@@ -69,10 +69,10 @@
         	Remote data collection is a challenging job where data needs to be collected frequently.
             The OPEnS Lab at OSU is currently using an Arduino microcontroller to collect weather information at HJ Andrews Research forest.
             The issue with the device is that it operates in a moisture rich environment not suitable for electronics and has been taken offline.
-            Our project is to improve the current microcontroller and establish a network of Arduinos to act as a weather station.
-            The weather station will collect various weather conditions and transmit the data wirelessly to a central hub.  
-            The data will be uploaded on the fly to a database and visualized on a website.
-        	The result will be a low-priced, open-source weather station that can be deployable in any environment for researchers around the world.
+            Our project will help improve the current microcontroller and establish a network of Arduinos to act as a weather station.
+            The weather station will collect various weather measurements and transmit the data wirelessly to a central hub.
+            The data will be uploaded to a database and visualized on a website.
+        	The result will be a comparably low-priced, open-source weather station that can be deployed in any environment for researchers around the world.
         \end{abstract}     
     \end{singlespace}
 \end{titlepage}
@@ -86,47 +86,53 @@
 
 % 8. now you write!
 \section{Description}
-In the past, there has been a weather-monitoring device active in the HJ Andrews Research Forest west of the Cascades. This device is very versatile, since it can capture various measurements such as temperature and humidity. Unfortunately, there are several issues with this device that need to be resolved.
+In the past, there has been a weather-monitoring device active in the HJ Andrews Research Forest west of the Cascades. This device is very versatile, since it can capture various measurements such as temperature and humidity. Unfortunately, there are several issues with this device that need to be resolved. 
 \newline
-One such issue is that the device restarts suddenly, and this causes it to lose all saved data. This can be bothersome, since the device is deployed in a remote location in the H.J. Andrews Research Forest and a large number of factors can make the device go through a power cycle without warning. 
+One such issue is that the device restarts abruptly, and this causes it to lose all saved data. This can be bothersome, since the device is deployed in a remote location in the H.J. Andrews Research Forest and a large number of factors can make the device go through a power cycle without warning. If power loss were to occur for any reason, all of the data stored so far in the device would be wiped out, and someone would have to travel for several hours into the forest to reset the device.
 \newline
-Another issue is that the device currently does not have a way of measuring albedo, or reflected light. Albedo is important to measure, since it gives a lot of information on the surrounding environment and what materials are present in it. 
+Another issue is that the device currently does not have a way of measuring the albedo effect, or reflected light. Albedo is important to measure, since it gives a lot of information on the surrounding environment and what materials are present in it. 
 \newline
-A third issue is that in order to get reliable measurements from many different locations, we would need to deploy many of our devices in different areas of the forest. To do this, we would need to create a large number of devices. Also, once we get these measurements, we will need a way to derive meaning from them. We will have to find patterns in the measurements and correlate them to the condition of the environment when the measurements were taken. This will need to be done via data plotting.
+A third issue is that to get reliable measurements from different locations, we would need to deploy more devices in different areas of the forest. To do this we would need to create a large number of devices.  Once we get these measurements, we will need a way to derive meaning from them. We will have to find patterns in the measurements and correlate them to the condition of the environment when the measurements were taken. This will need to be done via data plotting.
 \newline
-Finally, the battery life of the device is not long enough. A short battery life causes the device to need maintenance more often than it should, and in order to replace the battery, someone would be required to travel all the way into the forest. This can be very tiring, and over time can be dangerous and wasteful of resources. It takes two hours to travel into the forest, so repeatedly traveling there can significantly increase gasoline expenditures. If the device were to be deployed in an even more remote location, it would be even more difficult to access it and even more resources would be spent trying to get to it.
+Finally, the battery life of the device is not long enough. A short battery life causes the device to need maintenance more often than it should.  To replace the battery, someone would be required to travel all the way into the forest. This can be very tiring, and over time can be dangerous and wasteful of resources. It takes two hours to travel into the forest, so repeatedly traveling there can significantly increase gasoline expenditures.  Once at the device there isn’t a quick and easy way to reset the device without dismantling it.  If the device were to be deployed in an even more remote location, it would be even more difficult to access it and even more resources would be spent trying to get to it.
 
 
 \section {Solution}
-The new PHAZE device will measure temperature, rainfall, humidity, and light intensity. The temperature, rainfall, and humidity sensors are not changed. However, two new light sensors will be added to create a singular light sensor that measures the albedo effect (i.e. Albedometer). Moreover, a new structure to hold the device will be designed and be waterproofed.
+A new evaporometer device will be designed to fix previous flaws. The evaporometer will still measure temperature, rainfall, and humidity with the sensors used in the previous device. However, more features are to be added. 
 \newline
-To address the resetting problem in the old device, a reset button will be installed. If the button is pressed, the arduino will load initial values from memory rather than re-calibrating the sensors.
+First, to prevent data loss from power loss, memory storage will be used. The device will store its measured data in the storage. In the case of power loss we can still grab the measurement at the time it was supposed to be stored.
 \newline
-To remove the need to replace the battery on the PHAZE device, a solar panel will be installed to the device. It will charge a rechargeable battery, and the battery will power the device.
+Second, to measure the albedo, two light sensors will be added to the device. One of the sensors will measure light intensity directly from the sun, and the other sensors will measure the light from below. Once the data is measured, the albedo effect can be calculated. 
 \newline
-In order to create a network of PHAZE, 20 of the devices will be assembled. The devices will transmit data to a LoRa hub on a timed interval. The LoRa hub will then upload the data to google drive. The data will then be visualized geographically on plot.ly.
+Third, to get reliable measurements from the area, we will be deploying 20(1) devices. The devices will transmit data to a network hub at timed intervals simultaneously. The network hub will upload the data to a database, which will be visualized on a website.
+\newline
+Finally, to remove the need to replace the battery on the device, a solar panel will be installed to the device. It will charge a battery that powers the device when not transmitting data.
 
-\newpage
 \section {Performance Metrics}
-Our performance will be evaluated based on the amount of Arduino’s we can deploy and the Plot.ly site that we build once we have collected data. 
+Our performance will be evaluated based on the number of Arduinos we can deploy and the Plot.ly site that we build once we have collected data. 
 \newline
-Our first goal is to deploy 20 Arduinos.  Each Arduino at the minimum should be able to:
+Our first goal is to deploy 20\footnotemark Arduinos.  Each Arduino at the minimum should be able to:
 \begin{itemize}
 \item Measure temperature, humidity, rainfall, solar radiation, carbon dioxide levels, wind, and light.
-\item Last half year(*) without physical maintenance and be rechargeable.
-Transmit data on timed intervals to the LoRa hub, multiple devices should be able to transmit data to the hub simultaneously. 
-\item A:
-\newline
-\newline
-\newline
-\item B:
-\newline
-\newline
-\newline
+\item Persist for half a year\footnotemark without physical maintenance and be rechargeable via solar panels.
+\item Log data to the storage device and transmit data to the network hub.
+\item Transmit data to the hub simultaneously with all connected devices.
 \end{itemize}
-The biggest point of failure of the Arduino is the weather at HJ Andrews.  Our second goal will be improving the enclosures to protect the entire evaporometer from weather conditions.  This will ensure that all electronics are protected, we’re collecting so much data that we can’t afford to lose sensors throughout the uptime.
-\newline
-The Plot.ly will be our final goal as we would need everything above to succeed before we can successfully build the website. A website filled with all the necessary data for researchers to work on will help ensure that they are getting the most accurate data they need to work on their projects.  
+Our second goal is to improve and add-on to the source-code.  There should be improvements in:
+\begin{itemize}
+\item Transmitting the data, data should not be corrupt when transmitting.
+\item Receiving the data, the hub should be able to check if a device did transmit data instead of accepting everything.
+\item Real-world values, converting the data to scientific values readable by researchers.
+\end{itemize}
+Our final goal is to build a website to host all the information collected, it should contain:
+\begin{itemize}
+\item Visuals such as charts and graphs to help researchers view information remotely.
+\item Pre-sorted data to create new visuals.
+\item Links to the database to easily change values over time.
+\end{itemize}
+\footnotetext[1]{Subject to change, our meeting with the team indicated that only 5 was possible.}
+\footnotetext[2]{With the school year we won’t be able to test for this, but we can calculate it in the lab once everything is setup.
+}
 
 
 

@@ -70,6 +70,8 @@ int transmitBufLen; // length of transmit buffer
 const int ID = 100;
 uint16_t lightR, lightG, lightB, lightIR, lightFull;
 //char transmitBuf[23]; // this needs to be the length of the transmission buffer
+float temp_ar[5], humidity_ar[5], loadcell_ar[5];
+uint16_t lightIR_ar[5], lightFull_ar[5];
 
 HX711 scale(DOUT, CLK);
 
@@ -96,7 +98,7 @@ volatile bool TakeSampleFlag = false; // Flag is set with external Pin A0 Interr
 volatile bool LEDState = false; // flag t toggle LED
 volatile int HR = 8; // Hr of the day we want alarm to go off
 volatile int MIN = 0; // Min of each hour we want alarm to go off
-volatile int WakePeriodMin = 5;  // Period of time to take sample in Min, reset alarm based on this period (Bo - 5 min)
+volatile int WakePeriodMin = 1;  // Period of time to take sample in Min, reset alarm based on this period (Bo - 5 min)
 const byte wakeUpPin = 11;
 
 ////////////////////////
@@ -185,7 +187,7 @@ void setup()
 ////////////////////////// MAIN //////////////////////
 void loop() {
   if (!DEBUG)
-  { //if debug is false or off
+  {
     // Sleep the radio until needed
     rf95.sleep();
     // Enable SQW pin interrupt
@@ -224,9 +226,21 @@ void loop() {
     RTC_timeString = RTC_hrString + ":" + RTC_minString + "_" + RTC_monthString + "/" + RTC_dayString;
 
     // Read sensors
-    temp = sht31.readTemperature(); // degrees C
-    humidity = sht31.readHumidity();// relative as a percent
-    loadCell = scale.get_units() ;
+	for(int i = 0; i < 5; i++) {
+		temp_ar[i] = sht31.readTemperature();
+	}
+	temp = (temp_ar[0]+temp_ar[1]+temp_ar[2]+temp_ar[3]+temp_ar[4])/5; // degrees C
+	
+	for(int i = 0; i < 5; i++) {
+		humidity_ar[i] = sht31.readHumidity();
+	}
+	humidity = (humidity_ar[0]+humidity_ar[1]+humidity_ar[2]+humidity_ar[3]+humidity_ar[4])/5; // relative as a percent
+	
+    for(int i = 0; i < 5; i++) {
+		loadcell_ar[i] = scale.get_units();
+	}
+    loadCell = (loadcell_ar[0]+loadcell_ar[1]+loadcell_ar[2]+loadcell_ar[3]+loadcell_ar[4])/5;
+		
     advancedRead();  // gets full and IR light values, save to global vars lightFull, lightIR
 
     measuredvbat = analogRead(VBATPIN); // reading battery voltage
@@ -391,10 +405,17 @@ void advancedRead(void)
 {
   // More advanced data read example. Read 32 bits with top 16 bits IR, bottom 16 bits full spectrum
   // That way you can do whatever math and comparisons you want!
-  uint32_t lum = tsl.getFullLuminosity();
+  uint32_t lum;
+  for(int i = 0; i < 5; i++) {
+	lum = tsl.getFullLuminosity();
+	lightIR_ar[i] = lum >> 16;
+	lightFull_ar[i] = lum & 0xFFFF;
+  }
   //uint16_t ir, full;
-  lightIR = lum >> 16;
-  lightFull = lum & 0xFFFF;
+  lightIR = (lightIR_ar[0]+lightIR_ar[1]+lightIR_ar[2]+lightIR_ar[3]+lightIR_ar[4])/5;
+  lightFull = (lightFull_ar[0]+lightFull_ar[1]+lightFull_ar[2]+lightFull_ar[3]+lightFull_ar[4])/5;
+  //lightIR = lum >> 16;
+  //lightFull = lum & 0xFFFF;
   //Serial.print("[ "); Serial.print(millis()); Serial.print(" ms ] ");
   //Serial.print("IR: "); Serial.print(ir);  Serial.print("  ");
   //Serial.print("Full: "); Serial.print(full); Serial.print("  ");

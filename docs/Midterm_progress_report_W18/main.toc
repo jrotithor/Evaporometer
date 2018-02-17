@@ -1,0 +1,22 @@
+\contentsline {section}{\numberline {1}Introduction}{2}
+\contentsline {section}{\numberline {2}Alessandro}{2}
+\contentsline {subsection}{\numberline {2.1}Project Purposes and Goals}{2}
+\contentsline {subsection}{\numberline {2.2}Current Standing}{2}
+\contentsline {subsection}{\numberline {2.3}Work Left}{3}
+\contentsline {subsection}{\numberline {2.4}Impeded Problems}{4}
+\contentsline {subsection}{\numberline {2.5}Other Information}{4}
+\contentsline {section}{\numberline {3}Touku}{4}
+\contentsline {subsection}{\numberline {3.1}Project Purposes and Goals}{4}
+\contentsline {subsection}{\numberline {3.2}Current Standing}{5}
+\contentsline {subsection}{\numberline {3.3}Work Left: Data Upload}{5}
+\contentsline {subsubsection}{\numberline {3.3.1}Issue and Solution}{5}
+\contentsline {subsection}{\numberline {3.4}Work Left: SD Storage}{5}
+\contentsline {subsubsection}{\numberline {3.4.1}Issue and Solutions}{6}
+\contentsline {subsection}{\numberline {3.5}Other Information}{6}
+\contentsline {section}{\numberline {4}Jaydeep}{6}
+\contentsline {subsection}{\numberline {4.1}Project Purposes and Goals}{6}
+\contentsline {subsection}{\numberline {4.2}Current Standing}{7}
+\contentsline {subsection}{\numberline {4.3}Work Left}{7}
+\contentsline {subsection}{\numberline {4.4}Problems Faced}{7}
+\contentsline {subsection}{\numberline {4.5}Other Information}{8}
+\contentsline {section}{\numberline {5}Conclusion}{9}

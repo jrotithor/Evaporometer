@@ -17,6 +17,12 @@
   ****************************************************8
 */
 
+/* IMPORTANT NOTE:
+ * To make the RTC library work with Feather M0, go to RTClibExtended.h
+ * and add "#define _BV(bit) (1 << (bit))" to line 51 (without quote)
+ * That should fix the _BV error
+ */
+ 
 // LoRa 9x_TX
 // -*- mode: C++ -*-
 // Example sketch showing how to create a simple messaging client(transmitter)

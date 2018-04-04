@@ -62,6 +62,8 @@
 #define DOUT 12 //connecting the out and clock pins for the load cell
 #define CLK 13
 
+//Taring pin
+#define TAREPIN 10
 
 //Global Set-up//
 float temp, humidity, loadCell, measuredvbat;
@@ -110,9 +112,11 @@ void setup()
 
   // Turns on temp and humid sensor //
   sht31.begin(0x44);
+  //setting up tare pin
+  pinMode (TAREPIN, INPUT_PULLUP);
   // load cell calibration
   scale.set_scale(calibration_factor); //This value is obtained by using the Calibration sketch
-  scale.tare(); //Assuming there is no weight on the scale at start up, reset the scale to 0
+  //scale.tare(); 
   scale.power_down(); // Go into low power mode
 
   //LoRa transmission//
@@ -206,12 +210,19 @@ void loop() {
   }
   else
   {
-    delay(1000); // period in DEBUG mode to wait between samples
+    delay(30000); // period in DEBUG mode to wait between samples
     scale.power_up();
     TakeSampleFlag = 1;
   }
   if (TakeSampleFlag)
   {
+    // Check if the Tare Pin is activated
+    if (digitalRead(TAREPIN) == HIGH) {
+#if DEBUG == 1
+      Serial.println("Tare pin is high! Begin Taring");
+#endif
+      scale.tare();      
+    }
     // get RTC timestamp string
     DateTime now = RTC.now();
     uint8_t mo = now.month();

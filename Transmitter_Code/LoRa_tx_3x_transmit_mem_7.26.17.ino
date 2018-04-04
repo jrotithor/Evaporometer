@@ -185,7 +185,7 @@ void setup()
 ////////////////////////// MAIN //////////////////////
 void loop() {
   if (!DEBUG)
-  {
+  { //if debug is false or off
     // Sleep the radio until needed
     rf95.sleep();
     // Enable SQW pin interrupt

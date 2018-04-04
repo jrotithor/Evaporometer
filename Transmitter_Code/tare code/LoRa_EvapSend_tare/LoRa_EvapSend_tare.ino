@@ -31,6 +31,7 @@
 #include "HX711.h"  //https://learn.sparkfun.com/tutorials/load-cell-amplifier-hx711-breakout-hookup-guide
 #include "LowPower.h" // from sparkfun low power library found here https://github.com/rocketscream/Low-Power
 #include "RTClibExtended.h"// from sparkfun low power library found here https://github.com/FabioCuomo/FabioCuomo-DS3231/
+#include "FlashStorage.h" // https://github.com/cmaglie/FlashStorage
 //------------------------------------------------------------------------
 // Humidity/Temperature Sensor Settings--------------------
 //------------------------------------------------------------------------
@@ -103,6 +104,8 @@ volatile int MIN = 0; // Min of each hour we want alarm to go off
 volatile int WakePeriodMin = 1;  // Period of time to take sample in Min, reset alarm based on this period (Bo - 5 min)
 const byte wakeUpPin = 11;
 
+//stored offset in flash
+FlashStorage(stored_offset, long);
 ////////////////////////
 void setup()
 {
@@ -117,7 +120,7 @@ void setup()
   //pinMode (TARE_PIN, INPUT_PULLUP);
   // load cell calibration
   scale.set_scale(calibration_factor); //This value is obtained by using the Calibration sketch
-  //scale.tare(); //Assuming there is no weight on the scale at start up, reset the scale to 0
+  scale.set_offset(stored_offset.read()); //set the scale offset to the value stored in flash memory
   scale.power_down(); // Go into low power mode
 
   //LoRa transmission//
@@ -180,6 +183,11 @@ void setup()
   // you can set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(23, false);
 
+  //Enabling the RTC interrupt
+  attachInterrupt(wakeUpPin, onRTCWake, FALLING);
+  //Enabling the Tare interrupt
+  attachInterrupt(TARE_PIN, onTareCall, FALLING);
+
 
   //RTC stuff init//
 
@@ -197,7 +205,6 @@ void loop() {
     rf95.sleep();
     // Enable SQW pin interrupt
     // enable interrupt for PCINT7...
-    attachInterrupt(wakeUpPin, onRTCWake, FALLING);
 
     // Enter into Low Power mode here[RTC]:
     // Enter power down state with ADC and BOD module disabled.
@@ -460,11 +467,10 @@ void onRTCWake() {
 //**********************
 // Tare Interrupt Function
 //********************
-/*
 void onTareCall() {
   scale.tare();
-  long offset = scale.get_offset();
+  stored_offset.write(scale.get_offset());
   
 }
 
-*/
+

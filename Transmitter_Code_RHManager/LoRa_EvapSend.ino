@@ -16,6 +16,11 @@
   Alarm Function = 277, 298,  Wakeup ISR= 311, InteruptPin set-up= 313,323
   ****************************************************8
 */
+/* IMPORTANT NOTE:
+ * To make the RTC library work with Feather M0, go to RTClibExtended.h
+ * and add "#define _BV(bit) (1 << (bit))" to line 51 (without quote)
+ * That should fix the _BV error
+ */
 
 // LoRa 9x_TX
 // -*- mode: C++ -*-

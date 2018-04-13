@@ -50,13 +50,18 @@
 //------------------------------------------------------------------------
 // Debug Mode, Set flag to 0 for normal operation
 //------------------------------------------------------------------------
-#define DEBUG 1
+#define DEBUG 0
 //------------------------------------------------------------------------
 // LORA pins --------------------
 //------------------------------------------------------------------------
+//for feather m0
 #define RFM95_CS 8
 #define RFM95_RST 4
-#define RFM95_INT 7
+#define RFM95_INT 3
+// for 32u4
+//#define RFM95_CS 8
+//#define RFM95_RST 4
+//#define RFM95_INT 7
 
 #define SERVER_ADDRESS 2
 //battery voltage read pin
@@ -66,8 +71,8 @@
 #define calibration_factor 430000//This value is obtained using the Calibration sketch (grams)
 
 //load cell variables//
-#define DOUT 5 //connecting the out and clock pins for the load cell
-#define CLK 6
+#define DOUT 12 //connecting the out and clock pins for the load cell
+#define CLK 13
 
 //Taring pin
 //#define TARE_PIN 10
@@ -115,7 +120,7 @@ void setup()
   IDstring = String(ID, DEC);
   
   pinMode(wakeUpPin, INPUT_PULLUP);
-
+  attachInterrupt(wakeUpPin, onRTCWake, FALLING);
   // Turns on temp and humid sensor //
   sht31.begin(0x44);
   //setting up tare pin
@@ -138,13 +143,14 @@ void setup()
 #endif
   
   //check light sensor init
-  while (!tsl.begin())
+  /*while (!tsl.begin())
   {
   #if DEBUG == 1
     Serial.println("No sensor found ... check your wiring?");
   #endif  
     while (1);
   }
+  */
   #if DEBUG == 1
   Serial.println("Found a TSL2591 sensor");
   #endif
@@ -187,7 +193,6 @@ void setup()
 
 
   //RTC stuff init//
-
   InitalizeRTC();
   #if DEBUG == 1
     Serial.print("Alarm set to go off every "); Serial.print(WakePeriodMin); Serial.println("min from program time");
@@ -202,7 +207,7 @@ void loop() {
     rf95.sleep();
     // Enable SQW pin interrupt
     // enable interrupt for PCINT7...
-    attachInterrupt(wakeUpPin, onRTCWake, FALLING);
+    attachInterrupt(digitalPinToInterrupt(wakeUpPin), onRTCWake, FALLING);
 
     // Enter into Low Power mode here[RTC]:
     // Enter power down state with ADC and BOD module disabled.
@@ -210,8 +215,9 @@ void loop() {
     LowPower.idle(IDLE_2);
     // <----  Wait in sleep here until pin interrupt
     // On Wakeup, proceed from here:
-    clearAlarmFunction(); // Clear RTC Alarm
-    scale.power_up();
+    //detachInterrupt(digitalPinToInterrupt(wakeUpPin));
+    //clearAlarmFunction(); // Clear RTC Alarm
+    //scale.power_up();
   }
   else
   {
@@ -221,6 +227,9 @@ void loop() {
   }
   if (TakeSampleFlag)
   {
+    detachInterrupt(digitalPinToInterrupt(wakeUpPin)); 
+    clearAlarmFunction(); // Clear RTC Alarm
+    scale.power_up();
     // get RTC timestamp string
     DateTime now = MyRTC.now();
     uint8_t mo = now.month();
@@ -290,10 +299,14 @@ void loop() {
     Serial.println("Sending to rf95_server");
 #endif
     //begin sending to data to receiver (loops 3x)
-    if(manager.sendtoWait((uint8_t*)transmitBuf, transmitBufLen, SERVER_ADDRESS))
+    if(manager.sendtoWait((uint8_t*)transmitBuf, transmitBufLen, SERVER_ADDRESS)) {
+#if DEBUG == 1
       Serial.println("Ok");
-    else
+    }
+    else {
       Serial.println("Send Failure");
+#endif
+    }
 
     // End big If statement from Sleep/Wake
     
@@ -460,6 +473,7 @@ void clearAlarmFunction()
 //********************
 void onRTCWake() {
   TakeSampleFlag = true;
+  //Serial.println("Interrupt called!");
 }
 
 //**********************

@@ -36,6 +36,7 @@
 #include "HX711.h"  //https://learn.sparkfun.com/tutorials/load-cell-amplifier-hx711-breakout-hookup-guide
 #include "LowPower.h" // from sparkfun low power library found here https://github.com/rocketscream/Low-Power
 #include "RTClibExtended.h"// from sparkfun low power library found here https://github.com/FabioCuomo/FabioCuomo-DS3231/
+#include "FlashStorage.h" // https://github.com/cmaglie/FlashStorage
 //------------------------------------------------------------------------
 // Humidity/Temperature Sensor Settings--------------------
 //------------------------------------------------------------------------
@@ -50,18 +51,13 @@
 //------------------------------------------------------------------------
 // Debug Mode, Set flag to 0 for normal operation
 //------------------------------------------------------------------------
-#define DEBUG 0
+#define DEBUG 1
 //------------------------------------------------------------------------
 // LORA pins --------------------
 //------------------------------------------------------------------------
-//for feather m0
 #define RFM95_CS 8
 #define RFM95_RST 4
-#define RFM95_INT 3
-// for 32u4
-//#define RFM95_CS 8
-//#define RFM95_RST 4
-//#define RFM95_INT 7
+#define RFM95_INT 7
 
 #define SERVER_ADDRESS 2
 //battery voltage read pin
@@ -71,8 +67,8 @@
 #define calibration_factor 430000//This value is obtained using the Calibration sketch (grams)
 
 //load cell variables//
-#define DOUT 12 //connecting the out and clock pins for the load cell
-#define CLK 13
+#define DOUT 5 //connecting the out and clock pins for the load cell
+#define CLK 6
 
 //Taring pin
 //#define TARE_PIN 10
@@ -113,6 +109,8 @@ volatile int MIN = 0; // Min of each hour we want alarm to go off
 volatile int WakePeriodMin = 1;  // Period of time to take sample in Min, reset alarm based on this period (Bo - 5 min)
 const byte wakeUpPin = 11;
 
+//stored offset in flash
+FlashStorage(stored_offset, long);
 ////////////////////////
 void setup()
 {
@@ -120,14 +118,14 @@ void setup()
   IDstring = String(ID, DEC);
   
   pinMode(wakeUpPin, INPUT_PULLUP);
-  attachInterrupt(wakeUpPin, onRTCWake, FALLING);
+
   // Turns on temp and humid sensor //
   sht31.begin(0x44);
   //setting up tare pin
   //pinMode (TARE_PIN, INPUT_PULLUP);
   // load cell calibration
   scale.set_scale(calibration_factor); //This value is obtained by using the Calibration sketch
-  //scale.tare(); //Assuming there is no weight on the scale at start up, reset the scale to 0
+  scale.set_offset(stored_offset.read()); //set the scale offset to the value stored in flash memory
   scale.power_down(); // Go into low power mode
 
   //LoRa transmission//
@@ -143,14 +141,13 @@ void setup()
 #endif
   
   //check light sensor init
-  /*while (!tsl.begin())
+  while (!tsl.begin())
   {
   #if DEBUG == 1
     Serial.println("No sensor found ... check your wiring?");
   #endif  
     while (1);
   }
-  */
   #if DEBUG == 1
   Serial.println("Found a TSL2591 sensor");
   #endif
@@ -191,8 +188,14 @@ void setup()
   // you can set transmitter powers from 5 to 23 dBm:
   rf95.setTxPower(23, false);
 
+  //Enabling the RTC interrupt
+  attachInterrupt(wakeUpPin, onRTCWake, FALLING);
+  //Enabling the Tare interrupt
+  attachInterrupt(TARE_PIN, onTareCall, FALLING);
+
 
   //RTC stuff init//
+
   InitalizeRTC();
   #if DEBUG == 1
     Serial.print("Alarm set to go off every "); Serial.print(WakePeriodMin); Serial.println("min from program time");
@@ -207,7 +210,6 @@ void loop() {
     rf95.sleep();
     // Enable SQW pin interrupt
     // enable interrupt for PCINT7...
-    attachInterrupt(digitalPinToInterrupt(wakeUpPin), onRTCWake, FALLING);
 
     // Enter into Low Power mode here[RTC]:
     // Enter power down state with ADC and BOD module disabled.
@@ -215,9 +217,8 @@ void loop() {
     LowPower.idle(IDLE_2);
     // <----  Wait in sleep here until pin interrupt
     // On Wakeup, proceed from here:
-    //detachInterrupt(digitalPinToInterrupt(wakeUpPin));
-    //clearAlarmFunction(); // Clear RTC Alarm
-    //scale.power_up();
+    clearAlarmFunction(); // Clear RTC Alarm
+    scale.power_up();
   }
   else
   {
@@ -227,9 +228,6 @@ void loop() {
   }
   if (TakeSampleFlag)
   {
-    detachInterrupt(digitalPinToInterrupt(wakeUpPin)); 
-    clearAlarmFunction(); // Clear RTC Alarm
-    scale.power_up();
     // get RTC timestamp string
     DateTime now = MyRTC.now();
     uint8_t mo = now.month();
@@ -299,14 +297,10 @@ void loop() {
     Serial.println("Sending to rf95_server");
 #endif
     //begin sending to data to receiver (loops 3x)
-    if(manager.sendtoWait((uint8_t*)transmitBuf, transmitBufLen, SERVER_ADDRESS)) {
-#if DEBUG == 1
+    if(manager.sendtoWait((uint8_t*)transmitBuf, transmitBufLen, SERVER_ADDRESS))
       Serial.println("Ok");
-    }
-    else {
+    else
       Serial.println("Send Failure");
-#endif
-    }
 
     // End big If statement from Sleep/Wake
     
@@ -473,17 +467,15 @@ void clearAlarmFunction()
 //********************
 void onRTCWake() {
   TakeSampleFlag = true;
-  //Serial.println("Interrupt called!");
 }
 
 //**********************
 // Tare Interrupt Function
 //********************
-/*
 void onTareCall() {
   scale.tare();
-  long offset = scale.get_offset();
+  stored_offset.write(scale.get_offset());
   
 }
 
-*/
+

@@ -50,7 +50,7 @@
 //------------------------------------------------------------------------
 // Debug Mode, Set flag to 0 for normal operation
 //------------------------------------------------------------------------
-#define DEBUG 0
+#define DEBUG 1
 //------------------------------------------------------------------------
 // LORA pins --------------------
 //------------------------------------------------------------------------
@@ -271,10 +271,22 @@ void loop() {
     // Manually power down the loadcell (wakes up when MCU wakes from sleep
     scale.power_down();
     tsl.disable();
-
+    if (isnan(temp)) {
+      tempString = "nan";
+    }
+    else {
+      tempString =  String(temp, 2); // 2 decimal places
+    }
+    if (isnan(humidity)) {
+      humidityString = "nan";
+      
+    }
+    else {
+      humidityString =  String(humidity, 2); // same
+    }
     // convert sensor data into string for concatenation
-    tempString =  String(temp, 2); // 2 decimal places
-    humidityString =  String(humidity, 2); // same
+    //tempString =  String(temp, 2); // 2 decimal places
+    //humidityString =  String(humidity, 2); // same
     loadCellString =  String(loadCell, 6); // 6 decimal places
     lightIRString = String(lightIR, DEC);
     lightFullString = String(lightFull, DEC);
@@ -487,3 +499,4 @@ void onTareCall() {
 }
 
 */
+  

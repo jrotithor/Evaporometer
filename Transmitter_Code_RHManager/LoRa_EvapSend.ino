@@ -50,7 +50,7 @@
 //------------------------------------------------------------------------
 // Debug Mode, Set flag to 0 for normal operation
 //------------------------------------------------------------------------
-#define DEBUG 1
+#define DEBUG 0
 //------------------------------------------------------------------------
 // LORA pins --------------------
 //------------------------------------------------------------------------
@@ -68,7 +68,7 @@
 #define VBATPIN A7
 
 //super validator calibration variable//
-#define calibration_factor 430000//This value is obtained using the Calibration sketch (grams)
+#define calibration_factor 501000//This value is obtained using the Calibration sketch (grams)
 
 //load cell variables//
 #define DOUT 12 //connecting the out and clock pins for the load cell
@@ -110,7 +110,7 @@ volatile bool TakeSampleFlag = false; // Flag is set with external Pin A0 Interr
 volatile bool LEDState = false; // flag t toggle LED
 volatile int HR = 8; // Hr of the day we want alarm to go off
 volatile int MIN = 0; // Min of each hour we want alarm to go off
-volatile int WakePeriodMin = 1;  // Period of time to take sample in Min, reset alarm based on this period (Bo - 5 min)
+volatile int WakePeriodMin = 5;  // Period of time to take sample in Min, reset alarm based on this period (Bo - 5 min)
 const byte wakeUpPin = 11;
 
 ////////////////////////
@@ -127,7 +127,7 @@ void setup()
   //pinMode (TARE_PIN, INPUT_PULLUP);
   // load cell calibration
   scale.set_scale(calibration_factor); //This value is obtained by using the Calibration sketch
-  //scale.tare(); //Assuming there is no weight on the scale at start up, reset the scale to 0
+  scale.tare(); //Assuming there is no weight on the scale at start up, reset the scale to 0
   scale.power_down(); // Go into low power mode
 
   //LoRa transmission//
@@ -221,7 +221,7 @@ void loop() {
   }
   else
   {
-    delay(30000); // period in DEBUG mode to wait between samples
+    delay(15000); // period in DEBUG mode to wait between samples
     scale.power_up();
     TakeSampleFlag = 1;
   }
@@ -294,7 +294,7 @@ void loop() {
     // RGB string - not yet possible with TSL2591
 
     //concatenate RGB and IR strings to stringTransmit
-    stringTransmit = String(IDstring + "," + RTC_timeString + "," + tempString + "," + humidityString + "," + loadCellString + "," + lightIRString + "," + lightFullString + "," + vbatString + "\0");//concates all strings into a big string
+    stringTransmit = String(IDstring + "," + RTC_timeString + "," + tempString + "," + humidityString + "," + loadCellString + "," + vbatString + "\0");//concates all strings into a big string
    
     // Calc len of transmit buffer:
     transmitBufLen = 1 + (char)stringTransmit.length(); // add 2 here to include last actual char

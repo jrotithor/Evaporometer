@@ -5,7 +5,7 @@ This repository contains all of the code used to create the web map and charts t
 
 The following files contain code used to create the geovisualization project:
 
-####index.html
+#### index.html
 
 Contains the actual web map. It contains the HTML and CSS used to render the features on the web page, and it also contains javascript that:
 

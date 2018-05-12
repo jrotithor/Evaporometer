@@ -3,6 +3,7 @@
 \usepackage{url}
 \usepackage{setspace}
 \usepackage{pgfgantt}
+\usepackage{vhistory}
 
 \newcommand{\indentitem}{\setlength\itemindent{35pt}}
 
@@ -19,8 +20,8 @@
 \def \CapstoneTeamName{		Team PHAZE}
 \def \CapstoneTeamNumber{		53}
 \def \GroupMemberOne{			Alessandro Lim}
-\def \GroupMemberTwo{			Touku Cha}
-\def \GroupMemberThree{			Jaydeep Rotithor}
+\def \GroupMemberTwo{			Jaydeep Rotithor}
+\def \GroupMemberThree{			Touku Cha}
 \def \CapstoneProjectName{		PHAZE | IoT Weather Station}
 \def \CapstoneSponsorCompany{		Openly Published Environmental Sensing Lab}
 \def \CapstoneSponsorPerson{		Chet Udell}
@@ -90,6 +91,11 @@
 %\listoftables
 \clearpage
 
+\begin{versionhistory}
+  \vhEntry{1.0}{11.6.2017}{AL, JR, TC}{Initial submission for Chet.}
+  \vhEntry{1.1}{5.9.2018}{AL, JR, TC}{Correction and updates to requirements}
+\end{versionhistory}
+
 % 8. now you write!
 \section{Introduction}
 \subsection{Purpose}
@@ -98,18 +104,18 @@ The purpose of this document is to describe the requirements for the Internet of
 PHAZE is an evaporometer which measures environmental data. The device will be used to help researchers gather weather information from remote areas, such as the H.J. Andrews Forest. The device will measure temperature, humidity, albedo, and rainfall. It is also built to protect the microcontrollers from humidity. 
 
 
-At least 20 PHAZE devices are planned to be deployed. The devices will transmit the data with LoRa radios to a server. The data from the devices will be handled by the server and will be uploaded. The data will be available in Google Drive and will be visualized in the OSU GeoViz system. 
+At least 20 PHAZE devices are planned to be deployed. The devices will transmit the data with LoRa radios to a server. The data from the devices will be handled by the server and will be uploaded. The data will be available in Google Drive and will be visualized on a web map. 
 
 \subsection{Definitions, acronyms and abbreviations}
 \begin{itemize}
 \item Database: a collection of data stored on the Internet.
 \item Evaporometer: The weather collecting device we will be building.
-\item GeoViz: A Geo-visualization hosted on a website.
 \item Google Drive: A cloud storage hosted by Google.
 \item IDE: an integrated development environment is a software application used in software development.
 \item IoT: internet of things, the connection of devices via the Internet to transmit and receive data.
 \item LoRa: long range, low power wireless radio.
 \item Microcontroller: a small computer on a single circuit.
+\item RSSI: Received signal strength indication.
 
 \item SD: secure digital, a non-volatile memory card used in the Evaporometer.
 
@@ -131,7 +137,7 @@ The parts of the project are: data collection, data transfer, and one web portal
 \newline
 \begin{figure}
  \caption{How the sensor and microcontroller connection is set.}
-\includegraphics{connections.eps}
+\includegraphics[width=17cm, height=20cm, keepaspectratio]{connections.eps}
 \end{figure}
 
 
@@ -144,16 +150,16 @@ After the data is saved onto the SD card the devices will transmit all collected
 Once data collection is finished the hub will begin the transfer process.  The hub will upload the data to the OPEnS Google Drive to hold all collected information via ethernet.  The data will be available in datasheets and can be easily transferred to other databases for usage.
 \newline
 
-We will be using the data analytics and visualization tool, GeoViz, to visualize all of our data.  The data will used to create geographical graph for researchers to use.  The visuals can be updated on the fly with additional data collected over time.
+We will be using the web map to visualize all of our data.  The data will used to create graphs and a map for researchers to use.  The visuals can be updated on the fly with additional data collected over time.
 \subsection{Product Functions}
-With the data up on GeoViz, researchers can view the data from anywhere in the world.  Researchers can always view the most current data by viewing the database.  If needed the researchers can travel to each device and collect the data straight from the SD card.
+With the data up on the web map, researchers can view the data from anywhere in the world.  Researchers can always view the most current data by viewing the database.  If needed the researchers can travel to each device and collect the data straight from the SD card.
 
 
-Each device can be setup to accommodate various sensors and will be rechargeable via solar panels.  If a hard reset is necessary a physical reset button is attached to the device for researchers to press, versus opening up the entire enclosure.
+Each device can be setup to accommodate various sensors and will be rechargeable via solar panels. Resetting the device will require opening the top enclosure and replug the battery.
 \subsection{User Characteristics}
-The users that will use the device are researchers. They will not interact with the hardware. However, they will interact with the data measured by the device. Which will be available on Google Drive and GeoViz.
+The users that will use the device are researchers. They will not interact with the hardware. However, they will interact with the data measured by the device. Which will be available on Google Drive and the web map.
 \subsection{Constraints}
-The Internet connection is a constraint for the server. If the internet connection in the server is cut off, the server will be unable to upload any data to Google Drive and the GeoViz.
+The Internet connection is a constraint for the server. If the internet connection in the server is cut off, the server will be unable to upload any data to Google Drive and the web map.
 
 
 Cloud storage space is also a constraint to the project. Google Drive is the main storage of the project. Once the max capacity of Google Drive is reached, the device will be unable to store any more data. 
@@ -166,11 +172,9 @@ Another assumption is that we will always have access to the network hub for our
 This section contains all the feature specifications of the project.
 
 \subsection{External Interface Requirements}
-\subsubsection{User interfaces}
-The device will have a push button configured in case a user wants to manually restart the device.
 
 \subsubsection{Hardware interfaces}
-The evaporometer uses Adafruit Feather M0 as the main microcontroller. It is powered by a 3.7V 2000mAh lithium ion battery with the RFM95 LoRa Radio built-in.  Along with the Feather MO we will be using: 1 SHT31-D temperature and humidity sensor, 1 DS3231 precision RTC, 2 TSL2591 light sensor, and 1 HX711 weighing sensor. The evaporometer is connected to uxcell 0-5 kg load cell which is connected to a rain catchment system.
+The Evaporometer uses Adafruit Feather M0 as the main microcontroller. It is powered by a 3.7V 2000mAh lithium ion battery with the RFM95 LoRa Radio built-in.  Along with the Feather MO we will be using: 1 SHT31-D temperature and humidity sensor, 1 DS3231 precision RTC, 2 TSL2561 light sensor, and 1 HX711 weighing sensor. The Evaporometer is connected to uxcell 0-5 kg load cell which is connected to a rain catchment system.
 
 \subsubsection{Software interfaces}
 Each microcontroller is programmed through the Arduino IDE in the C language.  Data transfer between the database is managed through JavaScript and a JSON file.  Depending on the final product we may use the PushingBox API for GET requests to push data onto Google Drive.
@@ -191,15 +195,19 @@ The device will automatically receive data from its surroundings using its vario
 \subsubsubsection{Associated functional requirements}
 The following lists are associated requirements:
 \begin{enumerate}
+
 \item Temperature and Humidity Measurement
 \newline
 The device will use the Adafruit SHT31-D Temperature and humidity sensor to gather this data.
+
 \item Rainfall Measurement
 \newline
 The device will measure rainfall with a rain catchment system made of fiberglass wick. The rain catchment system is connected to the evaporometer through uxcell load cell. The rainfall is then measured by measuring the weight of the rain catchment system with the HX711 weighing sensor.
+
 \item Albedo Measurement
 \newline
-The device will have 2 disks, and one will be above the other. The disk on the top will measure the direct sunlight, and the disk on the bottom will measure the reflected sunlight. The light on each disk will be measured with the TSL2591 light sensor. Dividing the reflected sunlight by the direct sunlight gives the albedo.
+The device will have 2 disks, and one will be above the other. The disk on the top will measure the direct sunlight, and the disk on the bottom will measure the reflected sunlight. The light on each disk will be measured with the TSL2561 light sensor. Dividing the reflected sunlight by the direct sunlight gives the albedo.
+
 \end{enumerate}
 \subsubsection{Data Transmission}
 The data will be transmitted from the device to a weather hub using LoRa.
@@ -211,13 +219,13 @@ The device will periodically send the data that it collected to a remote weather
 \subsubsubsection{Introduction/Purpose of feature}
 After the data is uploaded to Google Drive, it needs to be presentable and visualized to be used by researchers.
 \subsubsubsection{Stimulus / Response sequence}
-Once the data is available on Google Drive, the data will also be uploaded to Plot.ly and OSU’s GeoViz system.
+Once the data is available on Google Drive, the data will also be uploaded to the web map.
 \subsection{Performance requirements}
 \begin{itemize}
 
 \item The Adafruit SHT31-D will provide accurate data on temperature and humidity of the surroundings.
 \item The HX711 weighing sensor and the rainfall catchment system will successfully report the rainfall at the site of the device.
-\item The system of two disks and TSL2591 light sensors will correctly report the albedo of the area surrounding the device.
+\item The system of two disks and TSL2561 light sensors will correctly report the albedo of the area surrounding the device.
 \item The data will be successfully transmitted to a remote weather hub using LoRa using a 900 MHz antenna on the device.
 \end{itemize}
 \subsection{Design constraints}
@@ -225,7 +233,7 @@ The main constraint of the evaporometer is the battery. The evaporometer is conn
 \subsection{Software system attributes}
 Reliability- The battery will be able to power the system for up to 6 months.
 Availability- The data collected by the system will always be available to view since the system will be sending data back to the hub periodically.
-Maintainability- If the device is to ever fail, it will be able to be reset by the push of a button. This will ensure that no data is lost and that the device will not unexpectedly restart.
+
 \subsection{Other requirements}
 \subsubsection{Stretch Goals}
 If the project finishes before the deadline, more data measurements can be added to the evaporometer.
@@ -233,6 +241,8 @@ If the project finishes before the deadline, more data measurements can be added
 To measure carbon dioxide, a carbon dioxide sensor can be added to the evaporometer.
 \subsubsubsection{Wind Speed Measurement}
 An anemometer an be connected to the evaporometer to measure wind speed.
+\subsubsubsection{Solar Charging}
+Run the devices on battery while using solar cells to charge the battery, extending the running time of each device.
 
 \section{Gantt Chart}
 

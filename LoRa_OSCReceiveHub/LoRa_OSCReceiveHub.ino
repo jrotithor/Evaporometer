@@ -4,6 +4,7 @@
 #include <RHReliableDatagram.h>
 #include <OSCBundle.h>
 #include "LOOM_OSC_Scheme.h"
+#include <SD.h>
 
 #define DEBUG 1
 #define RFM95_CS 8

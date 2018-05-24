@@ -55,17 +55,17 @@
 // LORA pins --------------------
 //------------------------------------------------------------------------
 //for feather m0
-#define RFM95_CS 8
-#define RFM95_RST 4
-#define RFM95_INT 3
-// for 32u4
 //#define RFM95_CS 8
 //#define RFM95_RST 4
-//#define RFM95_INT 7
+//#define RFM95_INT 3
+// for 32u4
+#define RFM95_CS 8
+#define RFM95_RST 4
+#define RFM95_INT 7
 
 #define SERVER_ADDRESS 2
 //battery voltage read pin
-#define VBATPIN A7
+#define VBATPIN A9
 
 //super validator calibration variable//
 #define calibration_factor 501000//This value is obtained using the Calibration sketch (grams)
@@ -98,8 +98,8 @@ RHReliableDatagram manager(rf95, SERVER_ADDRESS);
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 // Create instance of TSL2561 light sensors
-Adafruit_TSL2561_Unified tsl_1 = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 25611); // can pass in a number for the sensor identifier (for your use later)
-Adafruit_TSL2561_Unified tsl_2 = Adafruit_TSL2561_Unified(TSL2561_ADDR_LOW, 25612); // can pass in a number for the sensor identifier (for your use later)
+Adafruit_TSL2561_Unified tsl_1 = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 12345); // top
+Adafruit_TSL2561_Unified tsl_2 = Adafruit_TSL2561_Unified(TSL2561_ADDR_LOW, 11111); // bottom
 
 // Create instance of DS3231 called RTC
 RTC_DS3231 MyRTC; //we are using the DS3231 RTC
@@ -206,12 +206,12 @@ void loop() {
     rf95.sleep();
     // Enable SQW pin interrupt
     // enable interrupt for PCINT7...
-    attachInterrupt(digitalPinToInterrupt(wakeUpPin), onRTCWake, FALLING);
+    pciSetup(11);
 
     // Enter into Low Power mode here[RTC]:
     // Enter power down state with ADC and BOD module disabled.
     // Wake up when wake up pin is low.
-    LowPower.idle(IDLE_2);
+    LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
     // <----  Wait in sleep here until pin interrupt
     // On Wakeup, proceed from here:
     //detachInterrupt(digitalPinToInterrupt(wakeUpPin));
@@ -470,6 +470,31 @@ void onRTCWake() {
 }
 
 //**********************
+// Wakeup in SQW ISR
+//********************
+// Function to init PCI interrupt pin
+// Pulled from: https://playground.arduino.cc/Main/PinChangeInterrupt
+
+void pciSetup(byte pin)
+{
+  *digitalPinToPCMSK(pin) |= bit (digitalPinToPCMSKbit(pin));  // enable pin
+  PCIFR  |= bit (digitalPinToPCICRbit(pin)); // clear any outstanding interrupt
+  PCICR  |= bit (digitalPinToPCICRbit(pin)); // enable interrupt for the group
+}
+
+
+// Use one Routine to handle each group
+
+ISR (PCINT0_vect) // handle pin change interrupt for D8 to D13 here
+{
+  if (digitalRead(11) == LOW)
+    TakeSampleFlag = true;
+}
+
+
+
+
+//**********************
 // Tare Interrupt Function
 //********************
 /*
@@ -478,6 +503,5 @@ void onTareCall() {
   long offset = scale.get_offset();
   
 }
-
 */
   

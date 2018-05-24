@@ -50,7 +50,7 @@
 //------------------------------------------------------------------------
 // Debug Mode, Set flag to 0 for normal operation
 //------------------------------------------------------------------------
-#define DEBUG 0
+#define DEBUG 1
 //------------------------------------------------------------------------
 // LORA pins --------------------
 //------------------------------------------------------------------------
@@ -380,11 +380,11 @@ void advancedRead(void)
   }
   lightIR_2 = (lightIR_ar[0] + lightIR_ar[1] + lightIR_ar[2] + lightIR_ar[3] + lightIR_ar[4]) / 5;
   lightFull_2 = (lightFull_ar[0] + lightFull_ar[1] + lightFull_ar[2] + lightFull_ar[3] + lightFull_ar[4]) / 5;
-  
+
   //measuring albedo
   lux1 = tsl_1.calculateLux(lightFull_1, lightIR_1);
   lux2 = tsl_2.calculateLux(lightFull_2, lightIR_2);
-  albedo = lux1/lux2;
+  albedo = (float) lux1/lux2;
 }
 
 

@@ -23,6 +23,7 @@
   <link href="vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
   <!-- Custom styles for this template-->
   <link href="css/sb-admin.css" rel="stylesheet">
+    <link href="css/nouislider.css" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"/>
 
   <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
@@ -46,7 +47,13 @@
   <script src="js/sb-admin.min.js"></script>
   <!-- Custom scripts for this page-->
   <script src="js/sb-admin-datatables.min.js"></script>
-
+  <script src="js/nouislider.js"></script>
+  <!-- Custom scripts for this page-->
+  <script src="js/nouislider.min.js"></script>
+  
+  
+  
+  
   <script src = "https://d3js.org/d3.v4.min.js"></script>
   <script src = "https://d3js.org/d3.v4.js"></script>
   <script src="billboard.js"></script>
@@ -101,6 +108,14 @@
     font-size: 12px;
     line-height: 16px;
     margin: 0;
+	
+#range_slider{
+
+	margin-bottom: 30px;
+
+}
+
+	
 }
   </style>
 
@@ -145,11 +160,25 @@
       </ol>
 	  
 	  <!--clickable buttons for user to select desired measurement-->
+		<h3>Chart Date Selection</h3>
+	  
+		<label for="spinner1_start">Enter the start date for the first device:</label>
+		<input id="spinner1_start" type = "datetime-local"/><br/>
+		<label for="spinner1_end">Enter the end date for the first device:</label>
+		<input id="spinner1_end" type = "datetime-local"/><br/>
+		<label for="spinner2_start">Enter the start date for the second device:</label>
+		<input id="spinner2_start" type = "datetime-local"/><br/>
+		<label for="spinner1_start">Enter the end date for the second device:</label>
+		<input id="spinner2_end" type = "datetime-local"/><br/>
+		<span class="example-val" id="event-start"></span>
+		<span class="example-val" id="event-end"></span>
+	  
 	  <div id="buttons">
 		<button type="button" id="temperature_select">Temperature</button>
 		<button type="button" id="humidity_select">Humidity</button>
 		<button type="button" id="loadcell_select">Load Cell</button>
 		<button type="button" id="battery_voltage_select">Battery Voltage</button>
+		
 		<!--<button type="button" id="elec_cond_select">Electric Conductivity</button>-->
 	  </div>
 	  <!--
@@ -161,6 +190,7 @@
         <div id = 'map1'></div>
         <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
       </div>
+	
       <!-- Line Chart Example-->
 	   <div class="card-mb-3">
         <div class="card-header">
@@ -300,6 +330,23 @@
   <script>
 
   
+	//var init_start_idx = 2;
+	//var init_end_idx = 100;
+  
+	var weekdays = [
+		"Sunday", "Monday", "Tuesday",
+		"Wednesday", "Thursday", "Friday",
+		"Saturday"
+	];
+	
+	var months = [
+		"January", "February", "March",
+		"April", "May", "June", "July",
+		"August", "September", "October",
+		"November", "December"
+	];
+
+  
   
 var map = L.map('map1').setView([44.55, -123.216], 14);
 var marker_color_list = ["Red", "Orange", "Yellow", "Green"];
@@ -317,17 +364,50 @@ function select_var(measurement){
 	selection = measurement
 	refresh(0)
 }
-
+//range_slider = document.getElementById('range_slider');
 var legend = L.control({position: 'topright'});
 
 
-//automatically refresh the page every 10 seconds
+//set up the date so that it is readable by the spin box
 
-
+function formatDate ( date ) {
+	if(date.getMonth() < 10 ){
+		month_str = "0" + (date.getMonth() + 1);
+	}
+	else{
+		month_str = date.getMonth();
+	}
+	if(date.getDate() < 10){
+		day_str = "0" + date.getDate();
+	}
+	else{
+		day_str = date.getDate();
+	}
+	if(date.getHours() < 10){
+		hour_str = "0" + date.getHours();
+	}
+	else{
+		hour_str = date.getHours();
+	}
+	if(date.getMinutes() < 10){
+		min_str = "0" + date.getMinutes();
+	}
+	else{
+		min_str = date.getMinutes();
+	}
+	
+	
+    return date.getFullYear() + "-" + month_str + "-" + day_str + "T" + hour_str + ":" + min_str; 
+	
+	/* weekdays[date.getDay()] + ", " +
+        date.getDate() + " " +
+        months[date.getMonth()] + " " +
+        date.getFullYear();*/
+}
 	
 	
 	function refresh(chart_flag){
-			
+		
 		  //console.log(selection);	
 		  //initialize arrays with chart description names
 		  var Date_arr = ["dates"];	
@@ -417,7 +497,288 @@ var legend = L.control({position: 'topright'});
 		  }
 		}
 		
-				  
+		
+		/*
+			if(range_slider.noUiSlider){
+				range_slider.noUiSlider.destroy();
+			}
+		
+		  noUiSlider.create(range_slider, {
+	start: [Date_arr[init_start_idx].getTime(), Date_arr[init_end_idx].getTime()],
+	connect: true,
+	range: {
+		'min': Date_arr[1].getTime(),
+		'max': Date_arr[Date_arr.length - 2].getTime()
+	},
+	
+	
+});		  
+*/
+
+
+//Set up the spinners so that the range is limited to the dates in the date array and that the end date cannot be before the start date. Also initialize them with a placeholder value
+
+$("#spinner1_start").attr({
+	"min" : formatDate(Date_arr[1]),
+	"max" : formatDate(Date_arr[Date_arr.length - 1]),
+	"value" : formatDate(Date_arr[2])
+
+	});
+	
+min_date_val1 = $("#spinner1_start").val();
+	
+$("#spinner1_end").attr({
+		"min" : min_date_val1,
+	"max" : formatDate(Date_arr[Date_arr.length - 1]),
+	"value" : min_date_val1
+
+	});
+		
+
+
+	
+$("#spinner2_start").attr({
+			"min" : formatDate(Date_arr2[1]),
+	"max" : formatDate(Date_arr2[Date_arr2.length - 1]),
+	"value" : formatDate(Date_arr2[2])
+
+	});
+	
+	min_date_val2 = $("#spinner2_start").val();	
+	
+$("#spinner2_end").attr({
+		"min" : min_date_val2,
+	"max" : formatDate(Date_arr2[Date_arr2.length - 1]),
+	"value" : min_date_val2
+
+	});
+
+
+
+	
+//document.getElementById('spinner1_start').step = "300";	
+//document.getElementById('spinner1_end').step = "300";
+//document.getElementById('spinner2_start').step = "300";
+//document.getElementById('spinner2_end').step = "300";	
+	
+//when the user changes the spin box data, refresh the charts to display what the user wants	
+	
+document.getElementById('spinner1_start').onchange = function(){refresh(1)};	
+document.getElementById('spinner1_end').onchange = function(){refresh(1)};
+document.getElementById('spinner2_start').onchange = function(){refresh(1)};
+document.getElementById('spinner2_end').onchange = function(){refresh(1)};
+
+	
+//var dateValues = [
+	//document.getElementById('event-start'),
+	//document.getElementById('event-end')
+//];
+
+/*range_slider.noUiSlider.on('update', function( values, handle ) {
+
+	dateValues[handle].innerHTML = formatDate(new Date(+values[handle]));
+	refresh(1);
+});
+
+var date_range = range_slider.noUiSlider.get();
+*/
+
+
+//pull data from the spin boxes
+
+var start_time1 = $("#spinner1_start").val();
+var end_time1 = $("#spinner1_end").val();
+var start_time2 = $("#spinner2_start").val();
+var end_time2 = $("#spinner2_end").val();
+
+//var date_range_list = [new Date(start_time), new Date(end_time)]
+
+//checks validity of dates
+
+
+var start_index1;
+var end_index1;
+
+//months are indexed 0-11 so we need to add 1
+
+var start_month1 = parseInt(start_time1.substring(5,7)) - 1
+
+var end_month1 = parseInt(end_time1.substring(5,7)) - 1
+
+//recreate date objects from the spin box selection
+
+var start_date1 = new Date(2018,start_month1,start_time1.substring(8,10), start_time1.substring(11,13),start_time1.substring(14,16)  );
+
+var end_date1 = new Date(2018,end_month1,end_time1.substring(8,10), end_time1.substring(11,13),end_time1.substring(14,16)  );
+
+//check if the input is invalid, meaning it is out of bounds or the start date is later than the end date
+
+if(start_date1.getTime() < Date_arr[1].getTime()){
+	start_date1 = Date_arr[1];
+	$("#spinner1_start").val(formatDate(start_date1));
+}
+if(end_date1.getTime() < Date_arr[1].getTime()){
+	end_date1 = Date_arr[1];
+	$("#spinner1_end").val(formatDate(end_date1));
+}
+
+if(start_date1.getTime() >  Date_arr[Date_arr.length - 1].getTime()){
+	start_date1 = Date_arr[Date_arr.length - 1];
+	$("#spinner1_start").val(formatDate(start_date1));
+}
+
+if(end_date1.getTime() >  Date_arr[Date_arr.length - 1].getTime()){
+	end_date1 = Date_arr[Date_arr.length - 1];
+	$("#spinner1_end").val(formatDate(end_date1));
+}
+
+if(start_date1.getTime() > end_date1.getTime()){
+	start_date1 = end_date1;
+	$("#spinner1_start").val(formatDate(end_date1));
+}
+
+
+//console.log(start_date1);
+
+//console.log(end_date1);
+
+//If the date selected by the user does not exist in the date list, round down to the nearest date
+
+if(Date_arr.indexOf(start_date1) == -1){
+	for(i = Date_arr.length - 1; i > 0; i--){
+		if(Date_arr[i].getTime() <= start_date1.getTime()){
+			start_date1 = Date_arr[i];
+			break;
+		}
+	}
+	
+}
+
+if(Date_arr.indexOf(end_date1) == -1){
+	for(i = Date_arr.length - 1; i > 0; i--){
+		if(Date_arr[i].getTime() <= end_date1.getTime()){
+			end_date1 = Date_arr[i];
+			break;
+		}
+	}
+	
+}
+
+
+//console.log(start_date1);
+
+//console.log(end_date1);
+
+//find the index in the date array which has a date equal to the one picked by the user.
+
+for(i = 1; i < Date_arr.length; i++){
+
+	if(Date_arr[i].getTime() == start_date1.getTime()){
+			start_index1  = i;
+		}
+		
+	if(Date_arr[i].getTime() == end_date1.getTime()){
+			end_index1  = i;
+		}
+
+}
+
+//
+
+var start_index2;
+var end_index2;
+
+//months are indexed 0-11 so we need to add 1
+
+var start_month2 = parseInt(start_time2.substring(5,7)) - 1
+
+var end_month2 = parseInt(end_time2.substring(5,7)) - 1
+
+//recreate date objects from the spin box selection
+
+var start_date2 = new Date(2018,start_month2,start_time2.substring(8,10), start_time2.substring(11,13),start_time2.substring(14,16)  );
+
+var end_date2 = new Date(2018,end_month2,end_time2.substring(8,10), end_time2.substring(11,13),end_time2.substring(14,16)  );
+
+
+//check if the input is invalid, meaning it is out of bounds or the start date is later than the end date
+
+if(start_date2.getTime() < Date_arr2[1].getTime()){
+	start_date2 = Date_arr2[1];
+	$("#spinner2_start").val(formatDate(start_date2));
+}
+if(end_date2.getTime() < Date_arr2[1].getTime()){
+	end_date2 = Date_arr2[1];
+	$("#spinner2_end").val(formatDate(end_date2));
+}
+
+if(start_date2.getTime() >  Date_arr2[Date_arr2.length - 1].getTime()){
+	start_date2 = Date_arr2[Date_arr2.length - 1];
+	$("#spinner2_start").val(formatDate(start_date2));
+}
+
+if(end_date2.getTime() >  Date_arr2[Date_arr2.length - 1].getTime()){
+	end_date2 = Date_arr2[Date_arr2.length - 1];
+	$("#spinner2_end").val(formatDate(end_date2));
+}
+
+if(start_date2.getTime() > end_date2.getTime()){
+	start_date2 = end_date2;
+	$("#spinner2_start").val(formatDate(start_date2));
+}
+
+//If the date selected by the user does not exist in the date list, round down to the nearest date
+
+if(Date_arr2.indexOf(start_date2) == -1){
+	for(i = Date_arr2.length - 1; i > 0; i--){
+		if(Date_arr2[i].getTime() <= start_date2.getTime()){
+			start_date2 = Date_arr2[i];
+			break;
+		}
+	}
+	
+}
+
+if(Date_arr2.indexOf(end_date2) == -1){
+	for(i = Date_arr2.length - 1; i > 0; i--){
+		if(Date_arr2[i].getTime() <= end_date2.getTime()){
+			end_date2 = Date_arr2[i];
+			break;
+		}
+	}
+	
+}
+
+
+
+
+
+//console.log(start_date2);
+
+//console.log(end_date2);
+
+//find the index in the date array which has a date equal to the one picked by the user.
+
+for(i = 1; i < Date_arr2.length; i++){
+
+	if(Date_arr2[i].getTime() == start_date2.getTime()){
+			start_index2  = i;
+		}
+		
+	if(Date_arr2[i].getTime() == end_date2.getTime()){
+			end_index2  = i;
+		}
+
+}
+
+
+//
+
+
+//console.log(date_range_list);
+//console.log(Date_arr);
+
+
 
 
 		//saves data into another array so that a backup is left after the original is used by billboard.js(billboard.js uses the pop function which removes data from the array permanently)
@@ -427,12 +788,65 @@ var legend = L.control({position: 'topright'});
 		var temp_BatteryVoltage = BatteryVoltage;
 		//var temp_ElecCond = ElecCond;
 		
+		//if the user picked an invalid data point within bounds, round to the nearest data point(down for end date, up for start date).
+		
+		if(!(Date_arr[start_index1])){
+			
+				start_index1 += 1;
+			
+		}
+		
+		if(!(Date_arr[end_index1])){
+			
+				end_index1 -= 1;
+			
+		}
+		
+		if(!(Date_arr2[start_index2])){
+			
+				start_index2 += 1;
+			
+		}
+		
+		if(!(Date_arr2[end_index2])){
+			
+				end_index2 -= 1;
+			
+		}
+		//slice the data arrays to only contain data that the user picked in the spin boxes
+		
+		
+		var chart_Date_arr = Date_arr.slice(start_index1, end_index1 + 1);
+		chart_Date_arr.unshift("dates")
+		var chart_Humidity = Humidity.slice(start_index1, end_index1 + 1);
+		chart_Humidity.unshift("Humidity");
+		var chart_TempC = TempC.slice(start_index1, end_index1 + 1);
+		chart_TempC.unshift("Temperature(Degrees Celsius)");
+		var chart_LoadCell = LoadCell.slice(start_index1, end_index1 + 1);	
+		chart_LoadCell.unshift("Load Cell");
+		var chart_BatteryVoltage = BatteryVoltage.slice(start_index1, end_index1 + 1);
+		chart_BatteryVoltage.unshift("Battery Voltage");
+		
 		var temp_Humidity2 = Humidity2;
 		var temp_TempC2 = TempC2;
 		var temp_LoadCell2 = LoadCell2;
 		var temp_BatteryVoltage2 = BatteryVoltage2;
+		
+		var chart_Date_arr2 = Date_arr2.slice(start_index2, end_index2 + 1);
+		chart_Date_arr2.unshift("dates")
+		var chart_Humidity2 = Humidity2.slice(start_index2, end_index2 + 1);
+		chart_Humidity2.unshift("Humidity");
+		var chart_TempC2 = TempC2.slice(start_index2, end_index2 + 1);
+		chart_TempC2.unshift("Temperature(Degrees Celsius)");
+		var chart_LoadCell2 = LoadCell2.slice(start_index2, end_index2 + 1);	
+		chart_LoadCell2.unshift("Load Cell");
+		var chart_BatteryVoltage2 = BatteryVoltage2.slice(start_index2, end_index2 + 1);
+		chart_BatteryVoltage2.unshift("Battery Voltage");
+		
+		
 		//var temp_ElecCond2 = ElecCond2;
 		//console.log(Date_arr);
+		
 		//generate the actual charts
 		if(chart_flag == 1){
         bb.generate({
@@ -445,8 +859,8 @@ var legend = L.control({position: 'topright'});
                   type: "line",
                   columns:
 				  [
-                      Humidity,
-					  Date_arr
+                      chart_Humidity,
+					  chart_Date_arr
 				 ],
 				
 				  
@@ -474,8 +888,8 @@ var legend = L.control({position: 'topright'});
                   type: "line",
                   columns:
 				  [
-                      Humidity2,
-					  Date_arr2
+                      chart_Humidity2,
+					  chart_Date_arr2
 				 ],
 				
 				  
@@ -500,8 +914,8 @@ var legend = L.control({position: 'topright'});
 				  xFormat : '%Y-%m-%d %H:%M',
                   type: "line",
                   columns: [
-                      TempC,
-					  Date_arr
+                      chart_TempC,
+					  chart_Date_arr
                   ]
               },
 			 axis:{
@@ -524,8 +938,8 @@ var legend = L.control({position: 'topright'});
 				  xFormat : '%Y-%m-%d %H:%M',
                   type: "line",
                   columns: [
-                      TempC2,
-					  Date_arr2
+                      chart_TempC2,
+					  chart_Date_arr2
                   ]
               },
 			 axis:{
@@ -548,8 +962,8 @@ var legend = L.control({position: 'topright'});
 				  xFormat : '%Y-%m-%d %H:%M',
                   type: "line",
                   columns: [
-                      LoadCell,
-					  Date_arr
+                      chart_LoadCell,
+					  chart_Date_arr
                   ]
               },
 			 axis:{
@@ -572,8 +986,8 @@ var legend = L.control({position: 'topright'});
 				  xFormat : '%Y-%m-%d %H:%M',
                   type: "line",
                   columns: [
-                      LoadCell2,
-					  Date_arr2
+                      chart_LoadCell2,
+					  chart_Date_arr2
                   ]
               },
 			 axis:{
@@ -597,8 +1011,8 @@ var legend = L.control({position: 'topright'});
 				  xFormat : '%Y-%m-%d %H:%M',
                   type: "line",
                   columns: [
-                      BatteryVoltage,
-					  Date_arr
+                      chart_BatteryVoltage,
+					  chart_Date_arr
                   ]
               },
 			 axis:{
@@ -621,8 +1035,8 @@ var legend = L.control({position: 'topright'});
 				  xFormat : '%Y-%m-%d %H:%M',
                   type: "line",
                   columns: [
-                      BatteryVoltage2,
-					  Date_arr2
+                      chart_BatteryVoltage2,
+					  chart_Date_arr2
                   ]
               },
 			 axis:{
@@ -729,6 +1143,8 @@ var legend = L.control({position: 'topright'});
 				
 		  }
 		  
+		  //set the marker color
+		  
 		 select_index = Date_arr.length - 1;
 		  if(select_list[select_index] <= legend_buckets[0]){
 				marker_color = marker_color_list[0];
@@ -834,13 +1250,14 @@ var legend = L.control({position: 'topright'});
 		  legend.addTo(map);
 
 		  });
-		  
+		 
 		  };
 		   
+//Automatically refresh the page every 5 minutes. Fires a one-off refresh after the first 20 seconds to make sure that the page does not stay down for 5 minutes. 		   
 $(document).ready(function(){
 		refresh(1);
 		setTimeout(function(){
-		refresh(1)}, 20000);
+		refresh(1);}, 20000);
 		setInterval(function(){
 		refresh(1)}, 300000);
 		  
